@@ -1,0 +1,745 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>QRCB Mandiri Monitoring — Hourly + Daily</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f4f6f9;color:#172033;font-family:Segoe UI,Arial,sans-serif}
+.wrap{max-width:1550px;margin:auto;padding:22px}
+.head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+h1{margin:0;font-size:24px}.muted{color:#64748b;font-size:12px}
+.card{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;margin-bottom:15px;box-shadow:0 2px 8px #00000008}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.box{border:1px dashed #cbd5e1;border-radius:10px;padding:14px;background:#fff}
+label{font-size:12px;color:#64748b;display:block;margin-bottom:6px}
+input,select,button{height:38px;border:1px solid #cbd5e1;border-radius:8px;padding:0 10px;background:#fff}
+input[type=file]{width:100%;padding:7px}
+button{cursor:pointer;font-weight:600}
+.primary{background:#14532d;color:white;border-color:#14532d}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.small{height:32px;font-size:12px}
+.status{font-size:12px;margin-top:8px}.ok{color:#166534}.warn{color:#92400e}.danger{color:#b91c1c}
+.filetag{display:inline-block;border:1px solid #e2e8f0;border-radius:999px;padding:4px 8px;margin:3px;background:#f8fafc;font-size:12px}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.kpi{border:1px solid #e5e7eb;border-radius:10px;padding:14px}.kpi b{display:block;font-size:21px;margin-top:4px}
+.tabs{display:flex;gap:7px;flex-wrap:wrap}.tab.active{background:#14532d;color:#fff}
+.pane{margin-top:14px;overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{padding:7px 8px;border:1px solid #b8c0cc;text-align:center;white-space:nowrap}
+th{background:#dbe5f4;font-weight:700}
+.report-grid{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid #222;background:#fff}
+.report-cell{padding:18px;border-right:1px solid #222;border-bottom:1px solid #222;min-width:0}
+.report-cell:nth-child(even){border-right:0}
+.report-cell:nth-last-child(-n+2){border-bottom:0}
+.report-title{text-align:center;font-size:16px;font-weight:700;margin:0 0 12px}
+.report-sub{text-align:center;font-size:12px;font-weight:700;background:#b8cbe8;border:1px solid #222;padding:5px;margin-bottom:0}
+.report-table{border:1px solid #222}
+.report-table th,.report-table td{border:1px solid #777;padding:4px 6px;font-size:11px}
+.report-table th{background:#dbe5f4}
+.report-table .name{text-align:left}
+.report-table .num{text-align:right}
+.legend{font-size:11px;color:#64748b;margin-top:8px}
+.warning{background:#fff7ed;border:1px solid #fed7aa;padding:10px;border-radius:8px;font-size:12px;margin-top:10px}
+.output-section{background:#fff;border:1px solid #e5e7eb;border-radius:12px;margin-bottom:15px;overflow:hidden}
+.output-header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #e5e7eb;background:#f8fafc}
+.output-heading{font-size:15px;font-weight:700;color:#172033}
+.output-note{font-size:11px;color:#64748b;margin-top:4px}
+.image-btn{height:34px;background:#14532d;color:#fff;border:1px solid #14532d;border-radius:8px;padding:0 12px;cursor:pointer;font-weight:600;white-space:nowrap}
+.image-btn:hover{opacity:.92}
+.rc-all-note{font-size:11px;color:#64748b;margin:0 0 10px}
+@media(max-width:700px){.output-header{align-items:flex-start;flex-direction:column}.image-btn{width:100%}}
+@media(max-width:1000px){.grid,.kpis{grid-template-columns:1fr 1fr}.report-grid{grid-template-columns:1fr}.report-cell{border-right:0!important}.report-cell:nth-last-child(-n+2){border-bottom:1px solid #222}.report-cell:last-child{border-bottom:0}}
+@media(max-width:600px){.grid,.kpis{grid-template-columns:1fr}}
+@media print{
+ body{background:#fff}.wrap{max-width:none;padding:0}.no-print{display:none!important}
+ .card{box-shadow:none;border:0;margin:0;padding:8px}.report-grid{border:2px solid #000}
+ .report-cell{break-inside:avoid}.report-title{font-size:13px}.report-table th,.report-table td{font-size:9px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="head">
+  <div>
+    <h1>QRCB Mandiri Monitoring V5</h1>
+    <div class="muted">4 File Export → Payment & Inquiry → Hourly + Daily sesuai periode pengiriman 00–06 / 00–12 / 00–18 / 00–24</div>
+  </div>
+  <div class="muted">Input → Process → Report</div>
+</div>
+
+<div class="card no-print">
+  <div class="grid">
+    <div class="box">
+      <label>🇸🇬 NETS — Export CSV/TXT</label>
+      <input id="nets" type="file" accept=".csv,.txt">
+      <div id="netsInfo" class="filetag">Belum dipilih</div>
+      <div class="muted" style="margin-top:9px"><b>Mapping: ACQUIRER</b> — NETS selalu masuk kategori Acquirer.</div>
+    </div>
+    <div class="box">
+      <label>🇯🇵 JAPAN — Export CSV/TXT</label>
+      <input id="japan" type="file" accept=".csv,.txt">
+      <div id="japanInfo" class="filetag">Belum dipilih</div>
+      <div class="muted" style="margin-top:9px"><b>Mapping: ACQUIRER</b> — JAPAN selalu masuk kategori Acquirer.</div>
+    </div>
+    <div class="box">
+      <label>🇮🇩 MANDIRI AS ACQUIRER — Export CSV/TXT</label>
+      <input id="acq" type="file" accept=".csv,.txt">
+      <div id="acqInfo" class="filetag">Belum dipilih</div>
+      <div class="muted" style="margin-top:9px">Dipakai untuk tabel ISSUER (partner = issuer).</div>
+    </div>
+    <div class="box">
+      <label>🇮🇩 MANDIRI AS ISSUER — Export CSV/TXT</label>
+      <input id="iss" type="file" accept=".csv,.txt">
+      <div id="issInfo" class="filetag">Belum dipilih</div>
+      <div class="muted" style="margin-top:9px">Dipakai untuk tabel ACQUIRER (partner = acquirer).</div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <label style="margin:0">Tanggal <input id="date" type="date"></label>
+    <label style="margin:0">Report Input (Cumulative)
+      <select id="period">
+        <option value="6">00:00–06:00</option>
+        <option value="12">00:00–12:00</option>
+        <option value="18">00:00–18:00</option>
+        <option value="24">00:00–24:00</option>
+      </select>
+    </label>
+    <button class="primary" id="process">Process 4 File</button>
+    <button id="demo">Demo</button>
+    <button id="print">Print / Save PDF</button>
+  </div>
+  <div id="periodOutput" class="status ok">Output interval: 00:00–06:00</div>
+  <div id="csvStatus" class="status muted">Belum ada file yang diproses.</div>
+  <div id="warnings"></div>
+</div>
+
+<div class="card">
+  <div class="kpis">
+    <div class="kpi"><span class="muted">Total TRX Output</span><b id="kTotal">0</b></div>
+    <div class="kpi"><span class="muted">RC 00 / Success</span><b id="kSuccess">0</b></div>
+    <div class="kpi"><span class="muted">Gagal</span><b id="kFailed">0</b></div>
+    <div class="kpi"><span class="muted">Success Rate</span><b id="kRate">0.00%</b></div>
+    <div class="kpi"><span class="muted">Amount</span><b id="kAmount">Rp 0</b></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="output-section">
+    <div class="output-header">
+      <div>
+        <div class="output-heading">Report Hourly + Daily</div>
+        <div class="output-note">Hourly = blok 6 jam terakhir • Daily = cumulative dari 00:00 sampai periode yang dipilih</div>
+      </div>
+      <button id="downloadReportImage" class="image-btn" type="button">⬇ Download Gambar Report</button>
+    </div>
+    <div id="report" class="pane"></div>
+  </div>
+
+  <div class="output-section">
+    <div class="output-header">
+      <div>
+        <div class="output-heading">RC Breakdown — ALL</div>
+        <div class="output-note">Full time 00:00–23:59 • tidak mengikuti periode dropdown</div>
+      </div>
+      <button id="downloadRCImage" class="image-btn" type="button">⬇ Download Gambar RC</button>
+    </div>
+    <div id="rcBreakdown" class="pane"></div>
+  </div>
+</div>
+
+</div>
+
+<script>
+let ROWS=[];
+const $=id=>document.getElementById(id);
+const nf=n=>Number(n||0).toLocaleString('id-ID');
+const pct=n=>(Number(n||0)*100).toFixed(2)+'%';
+const rup=n=>'Rp '+Number(n||0).toLocaleString('id-ID');
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+
+function parseLine(s,sep=','){
+  let a=[],c='',q=false;
+  for(let i=0;i<s.length;i++){
+    const x=s[i];
+    if(x==='"'){if(q&&s[i+1]==='"'){c+='"';i++}else q=!q}
+    else if(x===sep&&!q){a.push(c);c=''} else c+=x;
+  }
+  a.push(c);return a;
+}
+function detectSep(line){
+  const semi=(line.match(/;/g)||[]).length, comma=(line.match(/,/g)||[]).length, tab=(line.match(/\t/g)||[]).length;
+  return tab>semi&&tab>comma?'\t':(semi>comma?';':',');
+}
+async function readSmart(file){
+  const b=await file.arrayBuffer(),u=new Uint8Array(b);let text;
+  // Support UTF-16 files both with and without BOM.
+  // Mandiri export yang diberikan menggunakan UTF-16 BE tanpa BOM.
+  if(u[0]===255&&u[1]===254){
+    text=new TextDecoder('utf-16le').decode(b.slice(2));
+  }else if(u[0]===254&&u[1]===255){
+    text=new TextDecoder('utf-16be').decode(b.slice(2));
+  }else{
+    // Detect UTF-16 from the NUL-byte pattern before falling back to UTF-8.
+    const n=Math.min(u.length,2000);
+    let evenZero=0,oddZero=0;
+    for(let i=0;i<n;i++){if(u[i]===0){if(i%2===0)evenZero++;else oddZero++;}}
+    if(evenZero>n*0.20){
+      text=new TextDecoder('utf-16be').decode(b);
+    }else if(oddZero>n*0.20){
+      text=new TextDecoder('utf-16le').decode(b);
+    }else{
+      text=new TextDecoder('utf-8').decode(b);
+    }
+  }
+  text=text.replace(/^\uFEFF/,'').replace(/\u0000/g,'');
+  const lines=text.split(/\r?\n/).filter(x=>x.trim());if(!lines.length)return [];
+  const sep=detectSep(lines[0]),h=parseLine(lines[0],sep).map(x=>x.trim());
+  return lines.slice(1).map(line=>{const a=parseLine(line,sep),o={};h.forEach((k,i)=>o[k]=(a[i]??'').trim());return o});
+}
+function keyObj(o,names){
+  const keys=Object.keys(o),low={};
+  keys.forEach(k=>low[k.toLowerCase().replace(/[^a-z0-9]/g,'')]=k);
+  for(const n of names){
+    const k=low[n.toLowerCase().replace(/[^a-z0-9]/g,'')];
+    if(k!==undefined&&String(o[k]??'').trim()!=='')return o[k];
+  }
+  return '';
+}
+function parseNum(v){
+  if(v===null||v===undefined||String(v).trim()===''||/null/i.test(String(v)))return 0;
+  let s=String(v).trim().replace(/\s/g,'');
+  if(s.includes('.')&&s.includes(','))s=s.lastIndexOf(',')>s.lastIndexOf('.')?s.replace(/\./g,'').replace(',','.'):s.replace(/,/g,'');
+  else if(s.includes(',')&&!s.includes('.'))s=s.replace(',','.');
+  else if((s.match(/\./g)||[]).length>1)s=s.replace(/\./g,'');
+  return Number(s)||0;
+}
+function parseRC(v){return String(v??'').trim().replace(/[()]/g,'')||'NULL'}
+function isOK(rc){return ['0','00','000'].includes(String(rc).padStart(2,'0'))}
+function hourRange(h){return String(h).padStart(2,'0')+':00–'+String((Number(h)+1)%24).padStart(2,'0')+':00'}
+function getHourFromRange(v){
+  const s=String(v??'').trim();
+  // Support the actual exported formats:
+  // 06-07, 06–07, 06:00-07:00, 06:00–07:00, 06:00 - 11:59, etc.
+  let m=s.match(/^(\d{1,2})(?::\d{2})?\s*[-–—]\s*(\d{1,2})(?::\d{2})?$/);
+  if(m)return Number(m[1]);
+  m=s.match(/(?:^|\s)(\d{1,2})(?::\d{2})?\s*[-–—]\s*\d{1,2}(?::\d{2})?(?:\s|$)/);
+  return m?Number(m[1]):null;
+}
+function getHour(r){
+  const range=keyObj(r,['periode_jam','period','hour_range','hour','jam']);
+  const hr=getHourFromRange(range);if(hr!==null)return hr;
+  const dt=keyObj(r,['created_date','created_at','trx_time','transaction_time','datetime','dt','date_time','timestamp']);
+  if(dt){
+    const m=String(dt).match(/(?:^|[ T])(?:\d{1,4}[-/]\d{1,2}[-/]\d{1,4}\s+)?(\d{1,2}):/);
+    if(m)return Number(m[1]);
+  }
+  return null;
+}
+function serviceType(r){
+  // First try the expected service/type columns.
+  const preferred=String(keyObj(r,[
+    'qr_service','qr service','service','message','transaction_type',
+    'transaction type','trx_type','trx type','product','type',
+    'service_type','service type','transaction','description','msgtype','message_type'
+  ])).toUpperCase();
+
+  if(/^3000$/.test(preferred)||/QUERY|INQUIRY|JALIN-QR-QUERY|QR-QUERY/.test(preferred))return 'INQUIRY';
+  if(/^3001$/.test(preferred)||/PAYMENT|ADVICE|JALIN-PAYMENT|PAY\b/.test(preferred))return 'PAYMENT';
+
+  // Some Mandiri exports put the service label under a differently named
+  // column. Search the complete row instead of dropping the row.
+  const all=Object.values(r).map(v=>String(v??'').toUpperCase()).join(' | ');
+  if(/JALIN-QR-QUERY|QR-QUERY|INQUIRY/.test(all))return 'INQUIRY';
+  if(/JALIN-PAYMENT-ADVICE|PAYMENT|PAYMENT-ADVICE/.test(all))return 'PAYMENT';
+
+  return 'OTHER';
+}
+function rawCategory(r){
+  const x=String(keyObj(r,['category','kategori','failure_type','failure_category','result_type','error_type','group','type_error'])).toUpperCase();
+  if(x.includes('SYSTEM'))return 'SYSTEM';
+  if(x.includes('BUSINESS')||x.includes('BISNIS'))return 'BUSINESS';
+  return '';
+}
+function failureType(r){
+  const explicit=rawCategory(r);if(explicit)return explicit;
+  const rc=parseRC(keyObj(r,['response_code','responsecode','RC','rc','result_code','code']));
+  const desc=String(keyObj(r,['result_desc','result description','Result DESC','Result Desc','result','description','error_message','response_description'])).toUpperCase();
+  if(['68','91'].includes(rc)||/TIMEOUT|TIME OUT|SYSTEM|TECHNICAL|CONNECTION|CONNECT|GATEWAY|NETWORK|FORMAT ERROR/.test(desc))return 'SYSTEM';
+  return 'BUSINESS';
+}
+function partnerFor(r,role){
+  if(role==='ACQ')return keyObj(r,['acq_name','acquirer','acquirer_name','acq','partner','network'])||'Unknown';
+  return keyObj(r,['iss_name','issuer','issuer_name','iss','partner','network'])||'Unknown';
+}
+function normaliseRows(raw,source,forcedSide){
+  return raw.map((r,idx)=>{
+    const total=keyObj(r,['total_transaksi','total_transaction','total_trx','trx_count','count','transaction_count','jumlah']);
+    const amount=keyObj(r,['total_amount_idr','total_amount','amount_idr','amount','transaction_amount','cardholderamount']);
+    let role=forcedSide;
+    const svc=serviceType(r);
+    const rc=parseRC(keyObj(r,['response_code','responsecode','RC','rc','result_code','code','rc_payment']));
+    const desc=keyObj(r,['result_desc','result description','Result DESC','Result Desc','result','description','response_description','keterangan']);
+    const trx=total!==''?parseNum(total):1;
+    return {
+      source,role,
+      partner:partnerFor(r,role),
+      service:svc,rc,desc:desc||'',
+      fail:failureType(r),
+      hour:getHour(r),trx,amount:parseNum(amount),
+      rrn:keyObj(r,['RRN','rrn','reference','reference_number']),
+      dt:keyObj(r,['created_date','created_at','trx_time','transaction_time','datetime','dt','date_time']),
+      raw:r,idx
+    };
+  });
+}
+function snapshotEnd(){return Number($('period').value)}
+function snapshotStart(){return snapshotEnd()===6?0:snapshotEnd()-6}
+function snapshotLabel(){
+  const start=snapshotStart(), end=snapshotEnd();
+  if(start===0 && end===6) return '00:00–05:59';
+  if(start===6 && end===12) return '06:00–11:59';
+  if(start===12 && end===18) return '12:00–17:59';
+  if(start===18 && end===24) return '18:00–23:59';
+  return String(start).padStart(2,'0')+':00–'+String(end-1).padStart(2,'0')+':59';
+}
+function snapshotRangeText(){
+  const start=snapshotStart(), end=snapshotEnd();
+  return String(start).padStart(2,'0')+':00 - '+String(end-1).padStart(2,'0')+':59';
+}
+function updatePeriodOutput(){
+  const iv=reportIntervals();
+  const fmt=(s,e)=>String(s).padStart(2,'0')+':00–'+String(e-1).padStart(2,'0')+':59';
+  $('periodOutput').textContent='Hourly (Kiri): '+fmt(iv.leftStart,iv.leftEnd)+
+    ' | Daily (Kanan): '+fmt(iv.rightStart,iv.rightEnd)+
+    ' | RC Breakdown: ALL 00:00–23:59';
+}
+function inRange(r,startHour,endHour){
+  // 00:00–24:00 cumulative mapping is for Mandiri ACQ/ISS only.
+  // NETS and JAPAN do not use the 24-hour cumulative snapshot.
+  if(endHour===24 && (r.source==='NETS'||r.source==='JAPAN')) return false;
+  return r.hour!==null && r.hour>=startHour && r.hour<endHour;
+}
+function roleSourceLabel(role){return role==='ACQ'?'Mandiri As Issuer':'Mandiri As Acquirer'}
+function dimensionLabel(role){return role==='ACQ'?'ACQUIRER':'ISSUER'}
+
+function aggregateRange(rows,service,role,startHour,endHour){
+  const map={};
+  rows.filter(r=>r.service===service&&r.role===role&&inRange(r,startHour,endHour))
+    .forEach(r=>{
+      const k=r.partner||'Unknown';
+      if(!map[k])map[k]={success:0,system:0,business:0,total:0,amount:0};
+      map[k].total+=r.trx;
+      map[k].amount+=r.amount;
+      if(isOK(r.rc))map[k].success+=r.trx;
+      else if(r.fail==='SYSTEM')map[k].system+=r.trx;
+      else map[k].business+=r.trx;
+    });
+  return map;
+}
+
+/* Backward-compatible helper for Export/other functions. */
+function aggregate(rows,service,role,endHour){
+  const start=endHour===6?0:Math.max(0,endHour-6);
+  return aggregateRange(rows,service,role,start,endHour);
+}
+
+function reportTable(service,role,startHour,endHour,reportType){
+  const perspective=roleSourceLabel(role),dimension=dimensionLabel(role);
+  const m=aggregateRange(ROWS,service,role,startHour,endHour);
+  const names=Object.keys(m).sort((a,b)=>a.localeCompare(b));
+
+  let rows=names.map(n=>{
+    const v=m[n],t=v.total||0;
+    return `<tr><td class="name">${esc(n)}</td>
+      <td class="num">${nf(v.success)}</td><td>${pct(t?v.success/t:0)}</td>
+      <td class="num">${nf(v.system)}</td><td>${pct(t?v.system/t:0)}</td>
+      <td class="num">${nf(v.business)}</td><td>${pct(t?v.business/t:0)}</td>
+      <td class="num">${nf(t)}</td><td>${pct(t?1:0)}</td></tr>`;
+  }).join('');
+
+  if(!rows)rows='<tr><td colspan="9">Tidak ada data</td></tr>';
+
+  return `<div class="report-cell">
+    <div class="report-title">Transaksi QRCB Mandiri - ${esc($('date').value||'')} (${reportType}) (${service.charAt(0)+service.slice(1).toLowerCase()})</div>
+    <div class="report-sub">All Transaksi QRCB Mandiri As ${esc(perspective.replace('Mandiri As ',''))} Jam ${String(startHour).padStart(2,'0')}:00 - ${String(endHour-1).padStart(2,'0')}:59</div>
+    <table class="report-table">
+      <thead>
+        <tr>
+          <th rowspan="3">${dimension}</th>
+          <th colspan="2">SUKSES</th>
+          <th colspan="4">GAGAL</th>
+          <th colspan="2">TOTAL</th>
+        </tr>
+        <tr>
+          <th colspan="2"></th>
+          <th colspan="2">SYSTEM</th>
+          <th colspan="2">BISNIS</th>
+          <th colspan="2"></th>
+        </tr>
+        <tr>
+          <th>Σ</th><th>%</th>
+          <th>Σ</th><th>%</th>
+          <th>Σ</th><th>%</th>
+          <th>TRX</th><th>%</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
+}
+
+function reportIntervals(){
+  const end=snapshotEnd();
+
+  // FINAL MAPPING:
+  // 00-06 -> Hourly kiri 00:00-05:59 | Daily kanan 00:00-05:59
+  // 00-12 -> Hourly kiri 06:00-11:59 | Daily kanan 00:00-11:59
+  // 00-18 -> Hourly kiri 12:00-17:59 | Daily kanan 00:00-17:59
+  // 00-24 -> Hourly kiri 18:00-23:59 | Daily kanan 00:00-23:59
+  if(end===6)  return {leftStart:0,leftEnd:6,rightStart:0,rightEnd:6};
+  if(end===12) return {leftStart:6,leftEnd:12,rightStart:0,rightEnd:12};
+  if(end===18) return {leftStart:12,leftEnd:18,rightStart:0,rightEnd:18};
+  if(end===24) return {leftStart:18,leftEnd:24,rightStart:0,rightEnd:24};
+  return {leftStart:Math.max(0,end-6),leftEnd:end,rightStart:0,rightEnd:end};
+}
+
+function renderReport(){
+  const iv=reportIntervals();
+
+  const cells=[
+    ['PAYMENT','ACQ','Hourly',iv.leftStart,iv.leftEnd],
+    ['PAYMENT','ACQ','Daily',iv.rightStart,iv.rightEnd],
+    ['PAYMENT','ISS','Hourly',iv.leftStart,iv.leftEnd],
+    ['PAYMENT','ISS','Daily',iv.rightStart,iv.rightEnd],
+    ['INQUIRY','ACQ','Hourly',iv.leftStart,iv.leftEnd],
+    ['INQUIRY','ACQ','Daily',iv.rightStart,iv.rightEnd],
+    ['INQUIRY','ISS','Hourly',iv.leftStart,iv.leftEnd],
+    ['INQUIRY','ISS','Daily',iv.rightStart,iv.rightEnd]
+  ];
+
+  $('report').innerHTML='<div class="report-grid">'+
+    cells.map(x=>reportTable(x[0],x[1],x[3],x[4],x[2])).join('')+
+    '</div>';
+}
+
+function renderHourlyData(){
+  const iv=reportIntervals(),start=iv.leftStart,end=iv.leftEnd;
+  let rows=[];
+  for(const service of ['PAYMENT','INQUIRY'])
+    for(const role of ['ACQ','ISS'])
+      for(let h=start;h<end;h++){
+        const m=aggregateRange(ROWS,service,role,h,h+1);
+        Object.entries(m).forEach(([partner,v])=>{
+          rows.push([service,role,hourRange(h),partner,v.success,v.system,v.business,v.total,v.amount]);
+        });
+      }
+
+  $('hourlyData').innerHTML='<b>Hourly '+snapshotLabel()+'</b>'+
+    table(['Service','Role','Hour','Partner','Success','System','Business','Total TRX','Amount'],
+      rows.map(r=>r.map((x,i)=>i>=4&&i<=7?nf(x):i===8?rup(x):esc(x))));
+}
+
+/*
+ * RC Breakdown:
+ * Tidak dipisah Payment / Inquiry.
+ * Mengikuti interval output yang dipilih.
+ */
+function rcBreakdownTable(source,startHour,endHour){
+  const rows={};
+
+  ROWS.filter(r=>
+    r.source===source &&
+    inRange(r,startHour,endHour) &&
+    !isOK(r.rc)
+  ).forEach(r=>{
+    // Breakdown is grouped by RC only.
+    // Multiple descriptions for the same RC are combined into one row.
+    const k=String(r.rc??'');
+
+    if(!rows[k]){
+      rows[k]={
+        rc:r.rc,
+        descs:[],
+        n:0,
+        cat:'BISNIS'
+      };
+    }
+
+    rows[k].n+=r.trx;
+
+    const d=String(r.desc||'Tidak ada keterangan').trim();
+    if(d && !rows[k].descs.includes(d)) rows[k].descs.push(d);
+
+    // If any transaction for the RC is SYSTEM, classify the RC as SYSTEM.
+    if(r.fail==='SYSTEM') rows[k].cat='SYSTEM';
+  });
+
+  const arr=Object.values(rows).sort((a,b)=>{
+    const na=Number(a.rc),nb=Number(b.rc);
+    if(Number.isFinite(na)&&Number.isFinite(nb))return na-nb;
+    return String(a.rc).localeCompare(String(b.rc));
+  });
+
+  const title=source==='ACQ'?'Mandiri As Acquirer':'Mandiri As Issuer';
+
+  return `<div style="margin-bottom:18px">
+    <div class="report-sub">${title} — ${String(startHour).padStart(2,'0')}:00–${String(endHour-1).padStart(2,'0')}:59</div>
+    ${table(
+      ['RC','Jumlah RC','Keterangan','Kategori'],
+      arr.map(x=>[
+        esc(x.rc),
+        nf(x.n),
+        esc(x.descs.join(' / ') || 'Tidak ada keterangan'),
+        esc(x.cat)
+      ])
+    )}
+  </div>`;
+}
+
+function renderRCBreakdown(){
+  const start=0,end=24;
+  $('rcBreakdown').innerHTML=
+    '<div class="rc-all-note"><b>RC Breakdown — ALL 00:00–23:59</b><br>RC non-success dari Mandiri As Acquirer dan Mandiri As Issuer digabung tanpa pemisahan Payment / Inquiry.</div>'+
+    rcBreakdownTable('ACQ',start,end)+
+    rcBreakdownTable('ISS',start,end);
+}
+
+function table(h,rs){
+  return '<table><thead><tr>'+h.map(x=>'<th>'+x+'</th>').join('')+'</tr></thead><tbody>'+
+    (rs.length?rs.map(r=>'<tr>'+r.map(x=>'<td>'+x+'</td>').join('')+'</tr>').join(''):
+    '<tr><td colspan="'+h.length+'">Tidak ada data</td></tr>')+'</tbody></table>';
+}
+function renderDetail(){
+  $('detail').innerHTML='<b>Detail normalized data</b>'+table(
+    ['Source','Role','Service','Hour','Partner','RC','Failure','TRX','Amount','RRN','Time'],
+    ROWS.filter(r=>inRange(r,snapshotStart(),snapshotEnd())).slice(0,5000).map(r=>[esc(r.source),esc(r.role),esc(r.service),r.hour===null?'-':hourRange(r.hour),esc(r.partner),esc(r.rc),esc(r.fail),nf(r.trx),rup(r.amount),esc(r.rrn),esc(r.dt)])
+  );
+}
+function renderSource(counts){
+  $('source').innerHTML='<b>Input Source</b>'+table(
+    ['File','Peran report','Rows dibaca','Rows dipakai','Mapping'],
+    counts.map(x=>[esc(x.file),esc(x.role),nf(x.read),nf(x.used),esc(x.mapping)])
+  );
+}
+function renderKPIs(){
+  const rows=ROWS.filter(r=>inRange(r,snapshotStart(),snapshotEnd())),total=rows.reduce((s,r)=>s+r.trx,0),ok=rows.filter(r=>isOK(r.rc)).reduce((s,r)=>s+r.trx,0);
+  $('kTotal').textContent=nf(total);$('kSuccess').textContent=nf(ok);$('kFailed').textContent=nf(total-ok);
+  $('kRate').textContent=pct(total?ok/total:0);$('kAmount').textContent=rup(rows.reduce((s,r)=>s+r.amount,0));
+}
+function renderAll(counts=[]){renderKPIs();renderReport();renderRCBreakdown()}
+function listFile(inputId,infoId){$(inputId).addEventListener('change',()=>{const f=$(inputId).files[0];$(infoId).textContent=f?f.name:'Belum dipilih'})}
+['nets','japan','acq','iss'].forEach(id=>listFile(id,id+'Info'));
+
+$('period').addEventListener('change',()=>{
+  updatePeriodOutput();
+  $('warnings').innerHTML='<div class="warning"><b>Report:</b> Daily cumulative 00:00 sampai periode terpilih; Hourly blok 6 jam terakhir. <b>RC Breakdown:</b> ALL 00:00–23:59.</div>';
+  if(ROWS.length)renderAll();
+});
+
+$('process').onclick=async()=>{
+  try{
+    $('csvStatus').className='status';$('csvStatus').textContent='Membaca 4 file (NETS, JAPAN, Mandiri ACQ, Mandiri ISS)...';ROWS=[];
+    const inputs=[
+      {id:'nets',source:'NETS',side:'ACQ',role:'ACQUIRER (Mandiri As Issuer)',mapping:'NETS → ACQUIRER'},
+      {id:'japan',source:'JAPAN',side:'ACQ',role:'ACQUIRER (Mandiri As Issuer)',mapping:'JAPAN → ACQUIRER'},
+      {id:'acq',source:'ACQ',side:'ISS',role:'ISSUER (Mandiri As Acquirer)',mapping:'Mandiri AS ACQ → list ISSUER'},
+      {id:'iss',source:'ISS',side:'ACQ',role:'ACQUIRER (Mandiri As Issuer)',mapping:'Mandiri AS ISS → list ACQUIRER'}
+    ];
+    const counts=[];
+    for(const x of inputs){
+      const f=$(x.id).files[0];
+      if(!f){counts.push({file:x.source,role:x.role,read:0,used:0,mapping:x.mapping});continue}
+      const raw=await readSmart(f),norm=normaliseRows(raw,x.source,x.side);
+      ROWS.push(...norm);counts.push({file:x.source,role:x.role,read:raw.length,used:norm.length,mapping:x.mapping});
+    }
+    renderAll(counts);
+    $('csvStatus').className='status ok';
+    updatePeriodOutput();
+    const bySource={NETS:0,JAPAN:0,ACQ:0,ISS:0};
+    ROWS.forEach(r=>{if(bySource[r.source]!==undefined)bySource[r.source]+=1});
+    $('csvStatus').textContent='Selesai. NETS '+nf(bySource.NETS)+' • JAPAN '+nf(bySource.JAPAN)+' • Mandiri ACQ '+nf(bySource.ACQ)+' • Mandiri ISS '+nf(bySource.ISS)+' • '+nf(ROWS.length)+' baris normalized • '+nf(ROWS.reduce((s,r)=>s+r.trx,0))+' transaksi • Hourly '+snapshotLabel()+' • Daily cumulative sampai '+String(snapshotEnd()).padStart(2,'0')+':00 • RC ALL 00:00–23:59.';
+    $('warnings').innerHTML='<div class="warning"><b>Report:</b> Daily cumulative 00:00 sampai periode terpilih; Hourly blok 6 jam terakhir. <b>RC Breakdown:</b> ALL 00:00–23:59.</div>';
+  }catch(e){$('csvStatus').className='status danger';$('csvStatus').textContent='Error: '+e.message}
+};
+
+$('demo').onclick=()=>{
+  const d=[],add=(source,role,partner,service,h,rc,n,amount,fail='BUSINESS',desc='')=>d.push({source,role,partner,service,hour:h,rc,fail,trx:n,amount,rrn:'',dt:'',desc});
+  add('ISS','ACQ','ITMX Thailand','PAYMENT',0,'00',32,100000);
+  add('ISS','ACQ','PAYNET Malaysia','PAYMENT',0,'00',172,500000);
+  add('ISS','ACQ','PAYNET Malaysia','PAYMENT',1,'68',2,10000,'SYSTEM','Timeout');
+  add('ISS','ACQ','NETS Singapore','PAYMENT',2,'00',10,80000);
+  add('ISS','ACQ','Japan','PAYMENT',3,'00',5,50000);
+  add('ACQ','ISS','PAYNET Malaysia','PAYMENT',1,'00',242,700000);
+  add('ACQ','ISS','NETS Singapore','PAYMENT',1,'00',22,90000);
+  add('ACQ','ISS','UPI China','PAYMENT',1,'00',680,1200000);
+  add('ISS','ACQ','ITMX Thailand','INQUIRY',0,'00',40,0);
+  add('ISS','ACQ','ITMX Thailand','INQUIRY',1,'68',16,0,'SYSTEM','Timeout');
+  add('ISS','ACQ','PAYNET Malaysia','INQUIRY',1,'00',196,0);
+  add('ISS','ACQ','PAYNET Malaysia','INQUIRY',2,'05',55,0,'BUSINESS','Transaction not permitted to cardholder');
+  add('ISS','ACQ','NETS Singapore','INQUIRY',2,'00',13,0);
+  add('ACQ','ISS','PAYNET Malaysia','INQUIRY',1,'00',302,0);
+  add('ACQ','ISS','NETS Singapore','INQUIRY',1,'00',24,0);
+  add('ACQ','ISS','UPI China','INQUIRY',2,'00',842,0);
+  add('ACQ','ISS','MANDIRI AS ACQ','PAYMENT',3,'03',2,0,'SYSTEM','Approved, specifying that track 3 has been up');
+  add('ISS','ACQ','MANDIRI AS ISS','PAYMENT',4,'57',2,0,'SYSTEM','Transaction not permitted to cardholder');
+  ROWS=d;$('date').value='2026-09-29';renderAll([
+    {file:'NETS',role:'ACQUIRER (Mandiri As Issuer)',read:2,used:2,mapping:'NETS → ACQUIRER'},
+    {file:'JAPAN',role:'ACQUIRER (Mandiri As Issuer)',read:2,used:2,mapping:'JAPAN → ACQUIRER'},
+    {file:'ACQ',role:'ISSUER (Mandiri As Acquirer)',read:2,used:2,mapping:'Mandiri AS ACQ → list ISSUER'},
+    {file:'ISS',role:'ACQUIRER (Mandiri As Issuer)',read:2,used:2,mapping:'Mandiri AS ISS → list ACQUIRER'}
+  ]);
+  updatePeriodOutput();$('csvStatus').className='status ok';$('csvStatus').textContent='Demo aktif. Hourly '+snapshotLabel()+' • Daily cumulative • RC ALL 00:00–23:59.';$('warnings').innerHTML='<div class="warning">Demo hanya untuk melihat struktur Report Hourly + Daily dan RC Breakdown ALL.</div>';
+};
+
+/* ===== DOWNLOAD REPORT AS IMAGE =====
+   Robust browser-native exporter.
+   PNG is attempted first; SVG is used as a fallback if the browser
+   cannot rasterize foreignObject content.
+*/
+function collectStyles(){
+  let css='';
+  for(const sheet of document.styleSheets){
+    try{
+      for(const rule of sheet.cssRules) css+=rule.cssText+'\n';
+    }catch(e){}
+  }
+  return css;
+}
+
+function buildReportSVG(elementId){
+  const el=$(elementId);
+  if(!el) throw new Error('Bagian report tidak ditemukan.');
+
+  const oldDisplay=el.style.display;
+  el.style.display='block';
+
+  const rect=el.getBoundingClientRect();
+  const width=Math.ceil(Math.max(el.scrollWidth,rect.width,300));
+  const height=Math.ceil(Math.max(el.scrollHeight,rect.height,150));
+
+  const clone=el.cloneNode(true);
+  clone.style.display='block';
+  clone.style.margin='0';
+  clone.style.width=width+'px';
+  clone.style.maxWidth='none';
+  clone.style.background='#fff';
+  clone.style.color='#111';
+
+  // Hide interactive controls inside the captured area.
+  clone.querySelectorAll('.no-print,.image-btn,button').forEach(x=>x.style.display='none');
+
+  const css=collectStyles();
+  const svg=
+    '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xhtml="http://www.w3.org/1999/xhtml" '+
+    'width="'+width+'" height="'+height+'" viewBox="0 0 '+width+' '+height+'">'+
+    '<rect width="100%" height="100%" fill="#ffffff"/>'+
+    '<foreignObject x="0" y="0" width="'+width+'" height="'+height+'">'+
+      '<div xmlns="http://www.w3.org/1999/xhtml" style="width:'+width+'px;min-height:'+height+'px;background:#fff;">'+
+        '<style>'+css+'</style>'+
+        clone.outerHTML+
+      '</div>'+
+    '</foreignObject>'+
+    '</svg>';
+
+  el.style.display=oldDisplay;
+  return {svg,width,height};
+}
+
+function downloadBlob(blob,filename){
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+}
+
+function downloadElementAsImage(elementId,filename){
+  let built;
+  try{
+    built=buildReportSVG(elementId);
+  }catch(e){
+    alert(e.message||'Bagian report tidak ditemukan.');
+    return;
+  }
+
+  const {svg,width,height}=built;
+  const svgBlob=new Blob([svg],{type:'image/svg+xml;charset=utf-8'});
+  const svgUrl=URL.createObjectURL(svgBlob);
+  const img=new Image();
+
+  let finished=false;
+
+  img.onload=()=>{
+    if(finished)return;
+    finished=true;
+
+    const scale=Math.min(2,Math.max(1,window.devicePixelRatio||1));
+    const canvas=document.createElement('canvas');
+    canvas.width=Math.max(1,Math.round(width*scale));
+    canvas.height=Math.max(1,Math.round(height*scale));
+
+    const ctx=canvas.getContext('2d');
+    ctx.fillStyle='#fff';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    try{
+      ctx.drawImage(img,0,0,canvas.width,canvas.height);
+
+      canvas.toBlob(blob=>{
+        if(blob){
+          downloadBlob(blob,filename+'.png');
+        }else{
+          // Guaranteed fallback.
+          downloadBlob(svgBlob,filename+'.svg');
+        }
+        URL.revokeObjectURL(svgUrl);
+      },'image/png');
+    }catch(e){
+      downloadBlob(svgBlob,filename+'.svg');
+      URL.revokeObjectURL(svgUrl);
+    }
+  };
+
+  img.onerror=()=>{
+    if(finished)return;
+    finished=true;
+    // SVG is still a valid image and is much more reliable than a failed PNG.
+    downloadBlob(svgBlob,filename+'.svg');
+    URL.revokeObjectURL(svgUrl);
+  };
+
+  img.src=svgUrl;
+}
+
+$('downloadReportImage').onclick=()=>{
+  const date=($('date').value||'report').replaceAll('-','');
+  const period=snapshotLabel().replace(/[–:]/g,'-');
+  downloadElementAsImage(
+    'report',
+    'QRCB_Mandiri_Report_Hourly_Daily_'+date+'_'+period
+  );
+};
+
+$('downloadRCImage').onclick=()=>{
+  // RC tab may be hidden; exporter explicitly forces the target visible
+  // during measurement, so it can still be captured.
+  const date=($('date').value||'report').replaceAll('-','');
+  const period=snapshotLabel().replace(/[–:]/g,'-');
+  downloadElementAsImage(
+    'rcBreakdown',
+    'QRCB_Mandiri_RC_Breakdown_'+date+'_'+period
+  );
+};
+
+$('print').onclick=()=>window.print();
+$('date').value='2026-09-29';$('period').value='6';updatePeriodOutput();renderAll();
+</script>
+</body>
+</html>
