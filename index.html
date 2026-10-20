@@ -487,7 +487,7 @@ function rcBreakdownTable(source,startHour,endHour){
   const title=source==='ACQ'?'Mandiri As Acquirer':'Mandiri As Issuer';
 
   return `<div style="margin-bottom:18px">
-    <div class="report-sub">${title} — ${String(startHour).padStart(2,'0')}:00–${String(endHour-1).padStart(2,'0')}:59</div>
+      <div class="report-sub">${title}</div>
     ${table(
       ['RC','Jumlah RC','Keterangan','Kategori'],
       arr.map(x=>[
